@@ -1,7 +1,7 @@
-from flask import Blueprint, jsonify, request, render_template, send_file
+from flask import Blueprint, jsonify, request, render_template, send_file, redirect, url_for
 from sqlalchemy import exc
-from server.api.models import User, FileContents
-from server import db
+from server.api.models import User, FileContents, Photo
+from server import db, photos
 from io import BytesIO
 
 
@@ -33,25 +33,28 @@ def upload():
 @users_blueprint.route('/upload2', methods=['GET', 'POST'])
 def upload2():
     if request.method == 'POST':
-        filea = request.files['inputFile']
-        newFile = FileContents(name=filea.filename, data=filea.read())
+        filename = photos.save(request.files['inputFile'])
+        url = photos.url(filename)
+        newFile = Photo(filename=filename, url=url)
         db.session.add(newFile)
         db.session.commit()
 
-        return filea.filename
+        return redirect(url_for('users.show', id=newFile.id))
 
     else:
-        return render_template('index.html')
+        return render_template('upload2.html')
+
+
+@users_blueprint.route('/photo/<id>')
+def show(id):
+    myphoto = Photo.query.filter_by(id=id).first()
+    url = photos.url(myphoto.filename)
+    print('*******************************************************' + url)
+    return render_template('show.html', url=url, photo=myphoto.filename)
 
 
 @users_blueprint.route('/download', methods=['GET'])
 def download():
-    file_data = FileContents.query.filter_by(id=1).first()
-    return send_file(BytesIO(file_data.data), attachment_filename='test.png')
-
-
-@users_blueprint.route('/download2', methods=['GET'])
-def download2():
     file_data = FileContents.query.filter_by(id=1).first()
     return send_file(BytesIO(file_data.data), attachment_filename='test.png')
 

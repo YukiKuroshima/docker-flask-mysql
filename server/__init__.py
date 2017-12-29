@@ -5,10 +5,12 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 
 
 # instantiate the db
 db = SQLAlchemy()
+photos = UploadSet('photos', IMAGES)
 
 
 def create_app():
@@ -18,6 +20,13 @@ def create_app():
 
     # enable CORS
     CORS(app)
+
+    # Use flask-uploads to upload and get images
+
+    app.config['UPLOADED_PHOTOS_DEST'] = '/'
+
+    patch_request_class(app)
+    configure_uploads(app, photos)
 
     # set config
     app_settings = os.getenv('APP_SETTINGS')

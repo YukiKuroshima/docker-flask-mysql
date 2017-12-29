@@ -22,3 +22,10 @@ class FileContents(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(300))
     data = db.Column(db.LargeBinary)
+
+
+class Photo(db.Model):
+    __tablename__ = "photos"
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(300))
+    url = db.Column(db.String(300))
