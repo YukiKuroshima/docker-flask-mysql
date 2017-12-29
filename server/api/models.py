@@ -15,3 +15,10 @@ class User(db.Model):
         self.username = username
         self.email = email
         self.created_at = datetime.datetime.utcnow()
+
+
+class FileContents(db.Model):
+    __tablename__ = "files"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(300))
+    data = db.Column(db.LargeBinary)

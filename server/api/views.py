@@ -1,7 +1,8 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template, send_file
 from sqlalchemy import exc
-from server.api.models import User
+from server.api.models import User, FileContents
 from server import db
+from io import BytesIO
 
 
 users_blueprint = Blueprint('users', __name__)
@@ -13,6 +14,46 @@ def ping_pong():
         'status': 'success',
         'message': 'pong!'
     })
+
+
+@users_blueprint.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST':
+        filea = request.files['inputFile']
+        newFile = FileContents(name=filea.filename, data=filea.read())
+        db.session.add(newFile)
+        db.session.commit()
+
+        return filea.filename
+
+    else:
+        return render_template('index.html')
+
+
+@users_blueprint.route('/upload2', methods=['GET', 'POST'])
+def upload2():
+    if request.method == 'POST':
+        filea = request.files['inputFile']
+        newFile = FileContents(name=filea.filename, data=filea.read())
+        db.session.add(newFile)
+        db.session.commit()
+
+        return filea.filename
+
+    else:
+        return render_template('index.html')
+
+
+@users_blueprint.route('/download', methods=['GET'])
+def download():
+    file_data = FileContents.query.filter_by(id=1).first()
+    return send_file(BytesIO(file_data.data), attachment_filename='test.png')
+
+
+@users_blueprint.route('/download2', methods=['GET'])
+def download2():
+    file_data = FileContents.query.filter_by(id=1).first()
+    return send_file(BytesIO(file_data.data), attachment_filename='test.png')
 
 
 @users_blueprint.route('/users', methods=['POST'])
